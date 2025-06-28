@@ -1,0 +1,10 @@
+.sidebar{
+    background-color: white;
+    width: 250px;
+    flex-shrink: 0;
+
+}
+
+.sidebar-item{
+
+}

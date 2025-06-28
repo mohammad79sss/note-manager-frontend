@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'B Koodak';
+}
+
+
+
+body{
+    direction: rtl!important; /* for Persian layout */
+    font-family: 'B Koodak';
+}
