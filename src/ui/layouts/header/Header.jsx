@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import {useSelector} from "react-redux";
 import {useDispatch} from "react-redux";
 import {setLoginFalse} from "../../../store/redux/slices/loginSlice.js";
+import {
+    UserCircleIcon,
+} from "@heroicons/react/24/solid";
 
 export default function Header() {
     const navigate = useNavigate();
@@ -30,7 +33,7 @@ export default function Header() {
             <div className="mx-auto px-4 py-3 max-w-full">
                 <div className="flex items-center justify-between">
                     {/* Logo/Brand */}
-                    <a href="/" className="text-lg flex font-bold text-gray-900 hover:text-gray-700 w-60 h-12">
+                    <a href="/" className="text-lg flex font-bold text-gray-900 hover:text-gray-700 w-60 h-12 ">
                         <img className="w-10 h-12" src="src/assets/images/logo.png" alt=""/>
                         <span className='mr-8 mt-2'>
                             پنل کاربری
@@ -38,9 +41,9 @@ export default function Header() {
                     </a>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center gap-4">
+                    <div className=" md:flex items-center gap-4">
                         {/* User Dropdown */}
-                        <div className="relative group ml-32 border rounded w-36" >
+                        <div className="relative group ml-3 border rounded w-36" >
                             <button className="flex items-center gap-1 text-base font-medium text-gray-800 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 w-full justify-between">
 
                                 <span>
@@ -57,9 +60,11 @@ export default function Header() {
                                         onClick={handleEditProfile}
                                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-right"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 ml-2">
+{/*                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 ml-2">
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077l1.41-.513m14.095-5.13l1.41-.513M5.106 17.785l1.15-.964m11.49-9.642l1.149-.964M7.501 19.795l.75-1.3m7.5-12.99l.75-1.3m-6.063 16.658l.26-1.477m2.605-14.772l.26-1.477m0 17.726l-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299M7.5 4.205L12 12m6.894 5.785l-1.149-.964M6.256 7.178l-1.15-.964m15.352 8.864l-1.41-.513M4.954 9.435l-1.41-.514M12.002 12l-3.75 6.495" />
-                                        </svg>
+                                        </svg>*/}
+                                        <UserCircleIcon className='w-4 h-4'/> &nbsp;
+
                                         حساب کاربری
                                     </button>
                                     <button
@@ -77,22 +82,7 @@ export default function Header() {
                     </div>
 
                     {/* Mobile menu button */}
-                    <div className="md:hidden flex items-center">
-                        <button
-                            onClick={toggleMobileMenu}
-                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none"
-                        >
-                            {mobileMenuOpen ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            )}
-                        </button>
-                    </div>
+
                 </div>
 
                 {/* Mobile menu */}

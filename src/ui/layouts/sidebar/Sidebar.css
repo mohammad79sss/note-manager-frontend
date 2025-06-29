@@ -1,5 +1,5 @@
-.sidebar{
-    background-color: white;
+.custom-sidebar{
+    background-color: white!important;
     width: 250px;
     flex-shrink: 0;
 

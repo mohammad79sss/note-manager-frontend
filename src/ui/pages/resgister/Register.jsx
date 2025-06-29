@@ -3,7 +3,8 @@ import axios from 'axios';
 import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import {setLoginTrue} from "../../../store/redux/slices/loginSlice.js";
-
+import {setUserId} from "../../../store/redux/slices/userIdSlice.js";
+import {decodeToken} from "../../shared/utils/functions.js";
 const Register = () => {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
 
@@ -45,8 +46,9 @@ const Register = () => {
                     // Save user info and token
                     localStorage.setItem('username', loginResponse.data.user.username);
                     localStorage.setItem('token', loginResponse.data.token);
-
+                    const userId = decodeToken(response.data.token);
                     dispatch(setLoginTrue());
+                    dispatch(setUserId(userId));
                     navigate('/');
                 } else {
                     setErrorMsg('ورود پس از ثبت‌نام با خطا مواجه شد.');
@@ -59,6 +61,8 @@ const Register = () => {
             setErrorMsg(error.response?.data?.message || 'خطای سرور.');
         }
     };
+
+
 
 
     return (

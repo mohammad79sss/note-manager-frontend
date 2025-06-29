@@ -8,7 +8,11 @@
 
 
 
-body{
-    direction: rtl!important; /* for Persian layout */
-    font-family: 'B Koodak';
+body {
+    direction: rtl !important;
+    font-family: 'B Koodak', sans-serif;
+}
+
+:lang(en) {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }

@@ -3,7 +3,7 @@ import Header from './ui/layouts/header/Header.jsx';
 import Sidebar from "./ui/layouts/sidebar/Sidebar.jsx";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import React, { useEffect } from 'react';
-import Public from "../src/ui/pages/public/Public.jsx";
+import PublicChatroom from "../src/ui/pages/public-chatroom/PublicChatroom.jsx";
 import EditUser from "../src/ui/pages/edit-user/EditUser.jsx";
 import Home from "../src/ui/pages/home/Home.jsx";
 import Login from "../src/ui/pages/login/Login.jsx";
@@ -15,8 +15,10 @@ import EditNote from "../src/ui/pages/edit-note/EditNote.jsx";
 import Note from "../src/ui/pages/note/Note.jsx";
 import Register from "../src/ui/pages/resgister/Register.jsx";
 import UserPage from "../src/ui/pages/user-page/UserPage.jsx";
+import EditChatroom from "./ui/pages/edit-chatroom/EditChatroom.jsx";
 import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
+import PublicNote from "./ui/pages/public-note/PublicNote.jsx";
 
 function App() {
 
@@ -39,9 +41,11 @@ function App() {
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/profile" element={<UserPage />} />
-                            <Route path="/public" element={<Public />} />
+                            <Route path="/public-chatroom" element={<PublicChatroom />} />
                             <Route path="/chatroom" element={<Chatroom />} />
                             <Route path="/create-chatroom" element={<CreateChatroom />} />
+                            <Route path="/public-note" element={<PublicNote />} />
+                            <Route path="/edit-chatroom" element={<EditChatroom />} />
                             <Route path="/create-note" element={<CreateNote />} />
                             <Route path="/edit-note" element={<EditNote />} />
                             <Route path="/note" element={<Note />} />

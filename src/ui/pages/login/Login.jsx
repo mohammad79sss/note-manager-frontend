@@ -3,7 +3,8 @@ import axios from 'axios';
 import {useNavigate} from "react-router-dom";
 import {useDispatch} from "react-redux";
 import {setLoginTrue} from "../../../store/redux/slices/loginSlice.js";
-
+import {setUserId} from "../../../store/redux/slices/userIdSlice.js";
+import {decodeToken} from "../../shared/utils/functions.js";
 
 const Login = () => {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
@@ -22,7 +23,10 @@ const Login = () => {
             if (response.status === 200) {
                 localStorage.setItem('username', response.data.user.username);
                 localStorage.setItem('token', response.data.token);
+                const userId = decodeToken(response.data.token);
+                console.log(userId)
                 dispatch(setLoginTrue());
+                dispatch(setUserId(userId));
                 navigate('/');
             } else {
                 console.error('Unexpected response format:', response.data);
@@ -31,6 +35,8 @@ const Login = () => {
             console.error('Login failed:', error.response?.data || error.message);
         }
     };
+
+
 
 
     return (
