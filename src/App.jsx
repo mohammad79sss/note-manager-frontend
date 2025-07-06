@@ -7,7 +7,6 @@ import PublicChatroom from "../src/ui/pages/public-chatroom/PublicChatroom.jsx";
 import EditUser from "../src/ui/pages/edit-user/EditUser.jsx";
 import Home from "../src/ui/pages/home/Home.jsx";
 import Login from "../src/ui/pages/login/Login.jsx";
-import AllUsers from "../src/ui/pages/all-users/AllUsers.jsx";
 import Chatroom from "../src/ui/pages/chatroom/Chatroom.jsx";
 import CreateChatroom from "../src/ui/pages/create-chatroom/CreateChatroom.jsx";
 import CreateNote from "../src/ui/pages/create-note/CreateNote.jsx";
@@ -19,7 +18,10 @@ import EditChatroom from "./ui/pages/edit-chatroom/EditChatroom.jsx";
 import {useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 import PublicNote from "./ui/pages/public-note/PublicNote.jsx";
-
+import { Toaster } from 'react-hot-toast';
+import UserSettings from "./ui/pages/users-settings/UserSettings.jsx";
+import ChatroomSettings from "./ui/pages/chatroom-settings/ChatroomSettings.jsx";
+import NoteSettings from "./ui/pages/note-settings/NoteSettings.jsx";
 function App() {
 
     const isLoggedIn = useSelector(state => state.login.isLoggedIn);
@@ -42,20 +44,25 @@ function App() {
                             <Route path="/" element={<Home />} />
                             <Route path="/profile" element={<UserPage />} />
                             <Route path="/public-chatroom" element={<PublicChatroom />} />
-                            <Route path="/chatroom" element={<Chatroom />} />
+                            <Route path="/chatroom/:chatroomId" element={<Chatroom />} />
                             <Route path="/create-chatroom" element={<CreateChatroom />} />
                             <Route path="/public-note" element={<PublicNote />} />
-                            <Route path="/edit-chatroom" element={<EditChatroom />} />
+                            <Route path="/edit-chatroom/:chatroomId" element={<EditChatroom />} />
                             <Route path="/create-note" element={<CreateNote />} />
-                            <Route path="/edit-note" element={<EditNote />} />
-                            <Route path="/note" element={<Note />} />
-                            <Route path="/all-users" element={<AllUsers />} />
+                            <Route path="/edit-note/:noteId" element={<EditNote />} />
+                            <Route path="/note/:noteId" element={<Note />} />
+                            <Route path="/all-users" element={<UserSettings />} />
+                            <Route path="/all-chatrooms" element={<ChatroomSettings />} />
+                            <Route path="/all-notes" element={<NoteSettings />} />
                             <Route path="/edit-user" element={<EditUser />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
+
                         </Routes>
                     </div>
                 </div>
+
+                <Toaster position="bottom-right" reverseOrder={false} />
             </div>
 
     );

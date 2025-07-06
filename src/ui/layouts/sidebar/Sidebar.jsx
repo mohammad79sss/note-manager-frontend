@@ -30,7 +30,7 @@ const groupedMenuItems = [
         items: [
             { name: "گفتگو های عمومی", icon: ChatBubbleLeftRightIcon, path: "/public-chatroom" },
             { name: "ساخت گفتگو", icon: PlusCircleIcon, path: "/create-chatroom" },
-            { name: "ویرایش گفتگو", icon: PencilSquareIcon, path: "/edit-chatroom" },
+/*            { name: "ویرایش گفتگو", icon: PencilSquareIcon, path: "/edit-chatroom" },*/
         ],
     },
     {
@@ -38,7 +38,7 @@ const groupedMenuItems = [
         items: [
             { name: "یادداشت های عمومی", icon: ChatBubbleLeftRightIcon, path: "/public-note" },
             { name: "ساخت یادداشت", icon: DocumentPlusIcon, path: "/create-note" },
-            { name: "ویرایش یادداشت", icon: PencilSquareIcon, path: "/edit-note" },
+/*            { name: "ویرایش یادداشت", icon: PencilSquareIcon, path: "/edit-note" },*/
         ],
     },
     {

@@ -10,8 +10,11 @@ import {
 export default function Header() {
     const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    /*const [username, setUsername] = useState('');*/
+    const username = localStorage.getItem("username");
     const isLoggedIn = useSelector(state=>state.login.isLoggedIn);
     const dispatch = useDispatch();
+
     const handleLogout = () => {
         localStorage.clear();
         dispatch(setLoginFalse());
@@ -47,7 +50,7 @@ export default function Header() {
                             <button className="flex items-center gap-1 text-base font-medium text-gray-800 hover:text-gray-900 px-3 py-2 rounded-md hover:bg-gray-100 w-full justify-between">
 
                                 <span>
-                                    کاربر
+                                    {username}
                                 </span>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

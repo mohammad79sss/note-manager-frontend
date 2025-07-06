@@ -12,7 +12,6 @@ const PublicNote = () => {
             try {
                 const res = await axios.get(`${baseApiUrl}/notes/public/all`);
                 setNotes(res.data);
-                console.log(res.data)
             } catch (err) {
                 console.error("خطا در دریافت یادداشت‌ها:", err);
             }
@@ -21,45 +20,44 @@ const PublicNote = () => {
         fetchNotes();
     }, []);
 
+    const formatDate = (date) =>
+        new Date(date).toLocaleDateString("fa-IR", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        });
+
+    const renderNotesGrid = (notes) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {notes.map((note) => (
+                <div
+                    key={note._id}
+                    className="bg-yellow-50 border border-yellow-200 shadow-md rounded-2xl p-5 hover:shadow-lg transition cursor-pointer"
+                    onClick={() => navigate(`/note/${note._id}`)}
+                >
+                    <h3 className="text-xl font-bold text-yellow-800 mb-2">{note.title}</h3>
+                    <p className="text-gray-700 mb-3 line-clamp-4 leading-relaxed"
+                       dir="rtl"
+                       dangerouslySetInnerHTML={{ __html: note.content }}>
+                    </p>
+                    <div className="text-sm text-gray-600 space-y-1">
+                        <p>📅 {formatDate(note.createdAt)}</p>
+                        <p>✍️ {note.ownerId?.username}</p>
+                        {/*{note.sharedId && <p>🔗 شناسه اشتراک: {note.sharedId}</p>}*/}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
     return (
-        <div className="p-4">
-            <h2 className="text-2xl font-bold text-purple-900 mb-6">یادداشت‌های عمومی</h2>
+        <div className="p-6 space-y-6">
+            <h2 className="text-2xl font-bold text-purple-900 mb-2">یادداشت‌های عمومی</h2>
 
             {notes.length === 0 ? (
                 <p className="text-gray-500">هیچ یادداشتی یافت نشد.</p>
             ) : (
-                <div className="overflow-x-auto rounded-lg shadow bg-white">
-                    <table className="min-w-full divide-y divide-gray-200 text-right">
-                        <thead className="bg-purple-800 text-white">
-                        <tr>
-                            <th className="px-6 py-3 text-sm font-semibold">عنوان</th>
-                            <th className="px-6 py-3 text-sm font-semibold">توضیحات</th>
-                            <th className="px-6 py-3 text-sm font-semibold">نویسنده</th>
-                            <th className="px-6 py-3 text-sm font-semibold">شناسه اشتراک‌گذاری</th>
-                            <th className="px-6 py-3 text-sm font-semibold">تاریخ</th>
-                        </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
-                        {notes.map((note) => (
-                            <tr
-                                key={note._id}
-                                className="hover:bg-purple-100 cursor-pointer transition"
-                                onClick={() => navigate(`/note/${note._id}`)}
-                            >
-                                <td className="px-6 py-4 text-sm text-gray-800">{note.title}</td>
-                                <td className="px-6 py-4 text-sm text-gray-600 whitespace-pre-wrap">
-                                    {note.content.length > 60 ? `${note.content.slice(0, 60)}...` : note.content}
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-600">{note.ownerId?.username}</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">{note.sharedId || '-'}</td>
-                                <td className="px-6 py-4 text-sm text-gray-600">
-                                    {new Date(note.createdAt).toLocaleDateString('fa-IR')}
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
+                renderNotesGrid(notes)
             )}
         </div>
     );
