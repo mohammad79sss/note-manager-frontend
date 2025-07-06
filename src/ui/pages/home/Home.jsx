@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import toast from 'react-hot-toast';
 import {deleteNote} from "../../../../../controllers/noteController.js";
+import chatroom from "../chatroom/Chatroom.jsx";
 
 export default function Home() {
     const [myNotes, setMyNotes] = useState([]);
@@ -144,34 +145,83 @@ export default function Home() {
 
     );
 
-    const renderTable = (items, type) => (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 shadow mt-3">
-            <table className="min-w-full text-sm text-right rtl text-gray-700">
-                <thead className="bg-purple-900 text-white">
-                <tr>
-                    <th className="p-3">عنوان</th>
-                    <th className="p-3">توضیح</th>
-                    <th className="p-3">نویسنده</th>
-                    <th className="p-3">تاریخ ایجاد</th>
-                </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                {items.map((item) => (
-                    <tr
-                        key={item._id}
-                        onClick={() => navigate(`/${type}/${item._id}`)}
-                        className="cursor-pointer hover:bg-purple-50 transition"
-                    >
-                        <td className="p-3 font-semibold">{item.title}</td>
-                        <td className="p-3 text-gray-600">{item.content}</td>
-                        <td className="p-3">{item.ownerId?.username}</td>
-                        <td className="p-3">{formatDate(item.createdAt)}</td>
+    const renderTable = (items, tableType) => {
+        let isMyChatroom = (tableType === "myChatroom") ? true :  false;
+        console.log(isMyChatroom)
+
+
+        const handleDeleteChatroom = async (e, item) => {
+            e.stopPropagation();
+            const confirmed = window.confirm('آیا از حذف این گفتگو اطمینان دارید؟');
+            if (!confirmed) return;
+
+            try {
+                // You should replace this with your actual DELETE request
+                // await axios.delete(`${baseApiUrl}/chatroom/${item._id}`);
+
+                toast.success('گفتگو با موفقیت حذف شد');
+                // Optionally update state here
+            } catch (err) {
+                console.error("Delete error:", err);
+                toast.error('خطا در حذف گفتگو');
+            }
+        };
+
+        return (
+            <div className="overflow-x-auto rounded-xl border border-gray-200 shadow mt-3">
+                <table className="min-w-full text-sm text-right rtl text-gray-700">
+                    <thead className="bg-purple-900 text-white">
+                    <tr>
+                        <th className="p-3">عنوان</th>
+                        <th className="p-3">توضیح</th>
+                        <th className="p-3">نویسنده</th>
+                        <th className="p-3">تاریخ ایجاد</th>
+                        {isMyChatroom && <th className="p-3 text-center">عملیات</th>}
                     </tr>
-                ))}
-                </tbody>
-            </table>
-        </div>
-    );
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                    {items.map((item) => (
+                        <tr
+                            key={item._id}
+                            className="hover:bg-purple-50 transition cursor-pointer"
+                            onClick={() => navigate(`/chatroom/${item._id}`)}
+                        >
+                            <td
+                                className="p-3 font-semibold cursor-pointer"
+                                onClick={() => navigate(`/${type}/${item._id}`)}
+                            >
+                                {item.title}
+                            </td>
+                            <td className="p-3 text-gray-600">{item.content}</td>
+                            <td className="p-3">{item.ownerId?.username}</td>
+                            <td className="p-3">{formatDate(item.createdAt)}</td>
+                            {isMyChatroom && (
+                                <td className="p-3 flex gap-2 justify-center">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/edit-chatroom/${item._id}`); // <-- adjust this path as needed
+                                        }}
+                                        className="bg-blue-100 text-blue-700 px-3 py-1 rounded-xl hover:bg-blue-200 text-xs"
+                                    >
+                                        ✏️ ویرایش
+                                    </button>
+                                    <button
+                                        onClick={(e) => handleDeleteChatroom(e, item)}
+                                        className="bg-red-100 text-red-700 px-3 py-1 rounded-xl hover:bg-red-200 text-xs"
+                                    >
+                                        🗑️ حذف
+                                    </button>
+                                </td>
+                            )}
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
+
 
     return (
         <div className="p-6 mt-6 space-y-12">
@@ -189,7 +239,7 @@ export default function Home() {
 
             <section>
                 <h2 className="text-xl font-bold text-purple-800 mb-2">گفتگوهای من</h2>
-                {renderTable(myChatrooms, "chatroom")}
+                {renderTable(myChatrooms, "myChatroom")}
             </section>
 
             <div className="w-full h-1 bg-purple-950"></div>
@@ -219,7 +269,7 @@ export default function Home() {
 
             <section>
                 <h2 className="text-xl font-bold text-purple-800 mb-2">گفتگوهای خصوصی قابل دسترس</h2>
-                {renderTable(sharedChatrooms, "chatroom")}
+                {renderTable(sharedChatrooms, "publicChatroom")}
             </section>
 
         </div>
