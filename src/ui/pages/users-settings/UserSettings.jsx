@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 function UserSettings() {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
     const [users, setUsers] = useState([]);
+    const [isLoading, setIsLoading]= useState(true);
 
     useEffect(() => {
         fetchUsers();
@@ -14,9 +15,11 @@ function UserSettings() {
         try {
             const res = await axios.get(`${baseApiUrl}/users`);
             setUsers(res.data);
+            setIsLoading(false);
         } catch (error) {
             console.error("Error fetching users:", error);
             toast.error("خطا در دریافت لیست کاربران");
+            setIsLoading(false);
         }
     };
 
@@ -68,7 +71,15 @@ function UserSettings() {
                     {users.length === 0 && (
                         <tr>
                             <td colSpan="4" className="text-center py-4 text-gray-500">
-                                هیچ کاربری یافت نشد.
+                                {isLoading ?
+                                    <span>
+                             در حال دریافت اطلاعات
+                            </span>
+                                    :
+                                    <span>
+                             هیچ کاربری وجود ندارد.
+                            </span>
+                                }
                             </td>
                         </tr>
                     )}

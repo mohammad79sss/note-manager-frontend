@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 function NoteSettings() {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
     const [notes, setNotes] = useState([]);
+    const [isLoading, setIsLoading]= useState(true);
 
     useEffect(() => {
         fetchNotes();
@@ -14,9 +15,11 @@ function NoteSettings() {
         try {
             const res = await axios.get(`${baseApiUrl}/notes`);
             setNotes(res.data);
+            setIsLoading(false);
         } catch (error) {
             console.error("Error fetching notes:", error);
             toast.error("خطا در دریافت لیست یادداشت‌ها");
+            setIsLoading(false);
         }
     };
 
@@ -82,7 +85,15 @@ function NoteSettings() {
                     {notes.length === 0 && (
                         <tr>
                             <td colSpan="6" className="text-center py-4 text-gray-500">
-                                هیچ یادداشتی یافت نشد.
+                                {isLoading ?
+                                    <span>
+                             در حال دریافت اطلاعات
+                            </span>
+                                    :
+                                    <span>
+                             هیچ یادداشتی وجود ندارد.
+                            </span>
+                                }
                             </td>
                         </tr>
                     )}

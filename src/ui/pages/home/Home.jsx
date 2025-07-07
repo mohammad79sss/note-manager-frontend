@@ -1,3 +1,4 @@
+import './Home.css';
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +16,7 @@ export default function Home() {
     const navigate = useNavigate();
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
     const userId = localStorage.getItem('userId');
+    const [isLoading, setIsLoading]= useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -28,8 +30,10 @@ export default function Home() {
                 setMyNotes(resMyNotes.data);
                 setMyChatrooms(resMyChats.data);
                 setSharedChatrooms(resSharedChats.data);
+                setIsLoading(false);
             } catch (error) {
                 console.error("Error fetching dashboard data", error);
+                setIsLoading(false);
             }
         };
 
@@ -168,9 +172,9 @@ export default function Home() {
         };
 
         return (
-            <div className="overflow-x-auto rounded-xl border border-gray-200 shadow mt-3">
-                <table className="min-w-full text-sm text-right rtl text-gray-700">
-                    <thead className="bg-purple-900 text-white">
+            <div className="overflow-x-auto shadow mt-3">
+                <table className="min-w-full bg-white border border-gray-200 shadow-sm rounded-lg">
+                    <thead className="bg-gray-100">
                     <tr>
                         <th className="p-3">عنوان</th>
                         <th className="p-3">توضیح</th>
@@ -228,12 +232,24 @@ export default function Home() {
 
             <div className="w-full h-1 bg-purple-950"></div>
 
-            <section>
+            <section className='custom-size'>
                 <h2 className="text-2xl font-bold text-purple-800 mb-4">یادداشت‌های من</h2>
                 {myNotes.length > 0 ? (
                     renderNotesGrid(myNotes)
                 ) : (
-                    <p className="text-gray-600">هیچ یادداشتی وجود ندارد.</p>
+                    <p className="text-gray-600">
+
+                        {isLoading ?
+                            <span>
+                             در حال دریافت اطلاعات
+                            </span>
+                            :
+                            <span>
+                             هیچ یادداشتی وجود ندارد.
+                            </span>
+                        }
+
+                    </p>
                 )}
             </section>
 

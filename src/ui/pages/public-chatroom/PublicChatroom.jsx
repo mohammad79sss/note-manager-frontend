@@ -6,6 +6,7 @@ const PublicChatroom = () => {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
     const [chatrooms, setChatrooms] = useState([]);
     const navigate = useNavigate();
+    const [isLoading, setIsLoading]= useState(true);
 
     useEffect(() => {
         const getAllPublicChatrooms = async () => {
@@ -13,8 +14,10 @@ const PublicChatroom = () => {
                 const response = await axios.get(`${baseApiUrl}/chatroom/public/all`);
                 setChatrooms(response.data);
                 console.log(response.data)
+                setIsLoading(false);
             } catch (e) {
                 console.error("Error fetching public-chatroom chatrooms:", e);
+                setIsLoading(false);
             }
         };
 
@@ -26,11 +29,21 @@ const PublicChatroom = () => {
             <h2 className="text-2xl font-bold text-purple-900 mb-6">گفتگوهای عمومی</h2>
 
             {chatrooms.length === 0 ? (
-                <p className="text-gray-500">هیچ گفتگویی یافت نشد.</p>
+                <p className="text-gray-500">
+                    {isLoading ?
+                        <span>
+                             در حال دریافت اطلاعات
+                            </span>
+                        :
+                        <span>
+                             هیچ گفت و گویی وجود ندارد.
+                            </span>
+                    }
+                </p>
             ) : (
-                <div className="overflow-x-auto rounded-lg shadow-lg bg-white">
-                    <table className="min-w-full divide-y divide-gray-200 text-right">
-                        <thead className="bg-purple-800 text-white">
+                <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white border border-gray-200 shadow-sm rounded-lg">
+                        <thead className="bg-gray-100">
                         <tr>
                             <th className="px-6 py-3 text-sm font-semibold">عنوان</th>
                             <th className="px-6 py-3 text-sm font-semibold">توضیحات</th>

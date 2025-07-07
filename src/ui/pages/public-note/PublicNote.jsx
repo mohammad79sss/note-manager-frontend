@@ -6,14 +6,17 @@ const PublicNote = () => {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
     const [notes, setNotes] = useState([]);
     const navigate = useNavigate();
+    const [isLoading, setIsLoading]= useState(true);
 
     useEffect(() => {
         const fetchNotes = async () => {
             try {
                 const res = await axios.get(`${baseApiUrl}/notes/public/all`);
                 setNotes(res.data);
+                setIsLoading(false);
             } catch (err) {
                 console.error("خطا در دریافت یادداشت‌ها:", err);
+                setIsLoading(false);
             }
         };
 
@@ -55,7 +58,17 @@ const PublicNote = () => {
             <h2 className="text-2xl font-bold text-purple-900 mb-2">یادداشت‌های عمومی</h2>
 
             {notes.length === 0 ? (
-                <p className="text-gray-500">هیچ یادداشتی یافت نشد.</p>
+                <p className="text-gray-500">
+                    {isLoading ?
+                        <span>
+                             در حال دریافت اطلاعات
+                            </span>
+                        :
+                        <span>
+                             هیچ یادداشتی وجود ندارد.
+                            </span>
+                    }
+                </p>
             ) : (
                 renderNotesGrid(notes)
             )}

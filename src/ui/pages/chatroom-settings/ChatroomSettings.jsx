@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 function ChatroomSettings() {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
     const [chatrooms, setChatrooms] = useState([]);
+    const [isLoading, setIsLoading]= useState(true);
 
     useEffect(() => {
         fetchChatrooms();
@@ -14,9 +15,11 @@ function ChatroomSettings() {
         try {
             const res = await axios.get(`${baseApiUrl}/chatroom`);
             setChatrooms(res.data);
+            setIsLoading(false);
         } catch (error) {
             console.error("Error fetching chatrooms:", error);
             toast.error("خطا در دریافت لیست چت‌روم‌ها");
+            setIsLoading(false);
         }
     };
 
@@ -76,7 +79,15 @@ function ChatroomSettings() {
                     {chatrooms.length === 0 && (
                         <tr>
                             <td colSpan="6" className="text-center py-4 text-gray-500">
-                                هیچ چت‌رومی یافت نشد.
+                                {isLoading ?
+                                    <span>
+                             در حال دریافت اطلاعات
+                            </span>
+                                    :
+                                    <span>
+                             هیچ گفت و گویی وجود ندارد.
+                            </span>
+                                }
                             </td>
                         </tr>
                     )}
