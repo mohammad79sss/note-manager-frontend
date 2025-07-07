@@ -1,0 +1,3 @@
+pagination lists and tables,
+make height fix and overflow-y-auto,
+adding search to tables
