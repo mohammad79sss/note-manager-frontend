@@ -1,27 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {useDispatch} from "react-redux";
+import {logoutUser} from "../../shared/utils/functions.js";
 
 const PublicNote = () => {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
     const [notes, setNotes] = useState([]);
-    const navigate = useNavigate();
     const [isLoading, setIsLoading]= useState(true);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
+    };
 
     useEffect(() => {
         const fetchNotes = async () => {
             try {
-                const res = await axios.get(`${baseApiUrl}/notes/public/all`);
+                const token = localStorage.getItem("token");
+
+                const res = await axios.get(`${baseApiUrl}/notes/public/all`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
                 setNotes(res.data);
                 setIsLoading(false);
             } catch (err) {
-                console.error("خطا در دریافت یادداشت‌ها:", err);
+                if (err.response?.status === 401) {
+                    handleLogout();
+                } else {
+                    console.error("خطا در دریافت یادداشت‌ها:", err);
+                }
                 setIsLoading(false);
             }
         };
 
         fetchNotes();
     }, []);
+
 
     const formatDate = (date) =>
         new Date(date).toLocaleDateString("fa-IR", {

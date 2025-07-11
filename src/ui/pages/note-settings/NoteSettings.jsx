@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import {useDispatch} from "react-redux";
+import {useNavigate} from "react-router-dom";
+import {logoutUser} from "../../shared/utils/functions.js";
 
 function NoteSettings() {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
     const [notes, setNotes] = useState([]);
     const [isLoading, setIsLoading]= useState(true);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
+    };
 
     useEffect(() => {
         fetchNotes();
@@ -13,12 +22,20 @@ function NoteSettings() {
 
     const fetchNotes = async () => {
         try {
-            const res = await axios.get(`${baseApiUrl}/notes`);
+
+            const res = await axios.get(`${baseApiUrl}/notes`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             setNotes(res.data);
             setIsLoading(false);
         } catch (error) {
-            console.error("Error fetching notes:", error);
-            toast.error("خطا در دریافت لیست یادداشت‌ها");
+            if (error.response?.status === 401) {
+                handleLogout();
+            } else {
+                console.error("Error fetching notes:", error);
+                toast.error("خطا در دریافت لیست یادداشت‌ها");
+            }
             setIsLoading(false);
         }
     };
@@ -28,14 +45,23 @@ function NoteSettings() {
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`${baseApiUrl}/notes/${noteId}`);
+
+            await axios.delete(`${baseApiUrl}/notes/${noteId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             setNotes((prev) => prev.filter((note) => note._id !== noteId));
             toast.success("یادداشت با موفقیت حذف شد");
         } catch (error) {
-            console.error("Error deleting note:", error);
-            toast.error("خطا در حذف یادداشت");
+            if (error.response?.status === 401) {
+                handleLogout();
+            } else {
+                console.error("Error deleting note:", error);
+                toast.error("خطا در حذف یادداشت");
+            }
         }
     };
+
 
     return (
         <div className="p-6">

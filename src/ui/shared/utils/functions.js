@@ -1,3 +1,5 @@
+import { setLoginFalse } from "../../../store/redux/slices/loginSlice";
+
 export function decodeToken(token) {
     try {
         const payload = token.split('.')[1];
@@ -7,3 +9,11 @@ export function decodeToken(token) {
         return null;
     }
 }
+
+
+export const logoutUser = (dispatch, navigate) => {
+    console.log("logoutUser");
+    localStorage.clear();
+    dispatch(setLoginFalse());
+    navigate("/login");
+};

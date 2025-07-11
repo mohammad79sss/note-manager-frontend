@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import {setLoginFalse} from "../../../store/redux/slices/loginSlice.js";
+import {useDispatch} from "react-redux";
+import {logoutUser} from "../../shared/utils/functions.js";
+
 
 const Chatroom = () => {
     const { chatroomId } = useParams();
@@ -13,43 +17,66 @@ const Chatroom = () => {
     const [messages, setMessages]=useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [newMessageToggler, setNewMessageToggler] = useState(false);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
 
 
     useEffect(() => {
-        async function fetchChatroom(){
+        async function fetchChatroom() {
             console.log('hit')
             try {
-                const res = await axios.get(`${baseApiUrl}/chatroom/${chatroomId}`);
+                const res = await axios.get(`${baseApiUrl}/chatroom/${chatroomId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 setChatroom(res.data);
-                console.log(res.data)
+                console.log(res.data);
                 setLoading(false);
-            }catch (err) {
-                toast.error('خطا در دریافت اطلاعات چت‌روم');
-                console.error(err);
+            } catch (err) {
+                if (err.response && err.response.status === 401) {
+                    handleLogout(); // Call logout function on unauthorized
+                } else {
+                    toast.error('خطا در دریافت اطلاعات چت‌روم');
+                    console.error(err);
+                }
                 setLoading(false);
             }
         }
-        fetchChatroom()
+
+        fetchChatroom();
     }, [chatroomId]);
 
 
 
 
+
     useEffect(() => {
-        async function fetchChatroomMessages(){
+        async function fetchChatroomMessages() {
             console.log('hit')
             try {
-                const res = await axios.get(`${baseApiUrl}/message/chatroom/${chatroomId}`);
+                const res = await axios.get(`${baseApiUrl}/message/chatroom/${chatroomId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
                 setMessages(res.data);
                 setLoading(false);
-            }catch (err) {
-                toast.error('خطا در دریافت اطلاعات چت‌روم');
-                console.error(err);
+            } catch (err) {
+                if (err.response && err.response.status === 401) {
+                    handleLogout(); // Logout on unauthorized
+                } else {
+                    toast.error('خطا در دریافت اطلاعات چت‌روم');
+                    console.error(err);
+                }
                 setLoading(false);
             }
         }
-        fetchChatroomMessages()
+
+        fetchChatroomMessages();
     }, [chatroomId, newMessageToggler]);
+
 
 
 
@@ -69,6 +96,10 @@ const Chatroom = () => {
             toast.error('خطا در ارسال پیام');
             console.error(err);
         }
+    };
+
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
     };
 
 

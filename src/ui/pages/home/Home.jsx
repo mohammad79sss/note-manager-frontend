@@ -6,6 +6,8 @@ import { useSelector } from "react-redux";
 import toast from 'react-hot-toast';
 import {deleteNote} from "../../../../../controllers/noteController.js";
 import chatroom from "../chatroom/Chatroom.jsx";
+import {logoutUser} from "../../shared/utils/functions.js";
+
 
 export default function Home() {
     const [myNotes, setMyNotes] = useState([]);
@@ -21,10 +23,18 @@ export default function Home() {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const token = localStorage.getItem("token");
+
                 const [resMyNotes, resMyChats, resSharedChats] = await Promise.all([
-                    axios.get(`${baseApiUrl}/notes/user/${userId}`),
-                    axios.get(`${baseApiUrl}/chatroom/by-user/${userId}`),
-                    axios.get(`${baseApiUrl}/chatroom/access/${userId}`),
+                    axios.get(`${baseApiUrl}/notes/user/${userId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }),
+                    axios.get(`${baseApiUrl}/chatroom/by-user/${userId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }),
+                    axios.get(`${baseApiUrl}/chatroom/access/${userId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }),
                 ]);
 
                 setMyNotes(resMyNotes.data);
@@ -32,13 +42,18 @@ export default function Home() {
                 setSharedChatrooms(resSharedChats.data);
                 setIsLoading(false);
             } catch (error) {
-                console.error("Error fetching dashboard data", error);
+                if (error.response?.status === 401) {
+                    handleLogout();
+                } else {
+                    console.error("Error fetching dashboard data", error);
+                }
                 setIsLoading(false);
             }
         };
 
         fetchData();
     }, []);
+
 
     const formatDate = (date) =>
         new Date(date).toLocaleDateString("fa-IR", {
@@ -47,11 +62,21 @@ export default function Home() {
             day: "numeric",
         });
 
+
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
+    };
+
     const handleJoinChatroom = async () => {
         if (!joinCode.trim()) return;
 
         try {
-            const res = await axios.get(`${baseApiUrl}/chatroom/by-share-id/${userId}/${joinCode}`);
+            const token = localStorage.getItem("token");
+
+            const res = await axios.get(`${baseApiUrl}/chatroom/by-share-id/${userId}/${joinCode}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             const chatroom = res.data;
 
             if (chatroom?._id) {
@@ -61,7 +86,9 @@ export default function Home() {
             }
         } catch (error) {
             const status = error.response?.status;
-            if (status === 404) {
+            if (status === 401) {
+                handleLogout();
+            } else if (status === 404) {
                 toast.error('چت‌روم یافت نشد', { duration: 6000 });
             } else if (status === 403) {
                 toast.error('دسترسی غیرمجاز به چت‌روم خصوصی', { duration: 6000 });
@@ -71,6 +98,7 @@ export default function Home() {
         }
     };
 
+
     const deleteNoteHandler = async (e, note) => {
         e.stopPropagation();
 
@@ -78,7 +106,11 @@ export default function Home() {
         if (!confirmed) return;
 
         try {
-            const res = await axios.delete(`${baseApiUrl}/notes/${note._id}`);
+            const token = localStorage.getItem("token");
+
+            const res = await axios.delete(`${baseApiUrl}/notes/${note._id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
             if (res.status === 200 || res.status === 204) {
                 setMyNotes((prev) => prev.filter((n) => n._id !== note._id));
@@ -87,8 +119,12 @@ export default function Home() {
                 toast.error('حذف یادداشت با مشکل مواجه شد');
             }
         } catch (err) {
-            console.error("Delete error:", err);
-            toast.error('خطا در ارتباط با سرور.');
+            if (err.response?.status === 401) {
+                handleLogout();
+            } else {
+                console.error("Delete error:", err);
+                toast.error('خطا در ارتباط با سرور.');
+            }
         }
     };
 

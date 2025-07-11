@@ -1,28 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import {useDispatch} from "react-redux";
+import {logoutUser} from "../../shared/utils/functions.js";
 
 const PublicChatroom = () => {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
     const [chatrooms, setChatrooms] = useState([]);
-    const navigate = useNavigate();
     const [isLoading, setIsLoading]= useState(true);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
+    };
 
     useEffect(() => {
         const getAllPublicChatrooms = async () => {
             try {
-                const response = await axios.get(`${baseApiUrl}/chatroom/public/all`);
+                const token = localStorage.getItem("token");
+
+                const response = await axios.get(`${baseApiUrl}/chatroom/public/all`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
                 setChatrooms(response.data);
-                console.log(response.data)
+                console.log(response.data);
                 setIsLoading(false);
             } catch (e) {
-                console.error("Error fetching public-chatroom chatrooms:", e);
+                if (e.response?.status === 401) {
+                    handleLogout();
+                } else {
+                    console.error("Error fetching public-chatroom chatrooms:", e);
+                }
                 setIsLoading(false);
             }
         };
 
         getAllPublicChatrooms();
     }, []);
+
 
     return (
         <div className="p-4">

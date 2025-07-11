@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import {logoutUser} from "../../shared/utils/functions.js";
+import {useDispatch} from "react-redux";
 
 const formatDate = (dateStr) => {
     const date = new Date(dateStr);
@@ -14,6 +16,8 @@ const formatDate = (dateStr) => {
     });
 };
 
+
+
 const Note = () => {
     const { noteId } = useParams();
     const [note, setNote] = useState(null);
@@ -21,14 +25,29 @@ const Note = () => {
     const [loading, setLoading] = useState(true);
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
 
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
+    };
+
     useEffect(() => {
         const fetchNote = async () => {
             try {
-                const res = await axios.get(`${baseApiUrl}/notes/${noteId}`);
+
+                const res = await axios.get(`${baseApiUrl}/notes/${noteId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
                 setNote(res.data);
             } catch (error) {
-                console.error('Error fetching note:', error);
-                toast.error('یادداشت پیدا نشد');
+                if (error.response?.status === 401) {
+                    handleLogout();
+                } else {
+                    console.error('Error fetching note:', error);
+                    toast.error('یادداشت پیدا نشد');
+                }
             } finally {
                 setLoading(false);
             }
@@ -36,17 +55,26 @@ const Note = () => {
 
         const fetchComments = async () => {
             try {
-                const res = await axios.get(`${baseApiUrl}/comment/note/${noteId}`);
+
+                const res = await axios.get(`${baseApiUrl}/comment/note/${noteId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
                 setComments(res.data || []);
             } catch (error) {
-                console.error('Error fetching comments:', error);
-                toast.error('عدم دریافت نظرات');
+                if (error.response?.status === 401) {
+                    handleLogout();
+                } else {
+                    console.error('Error fetching comments:', error);
+                    toast.error('عدم دریافت نظرات');
+                }
             }
         };
 
         fetchNote();
         fetchComments();
     }, [noteId]);
+
 
     if (loading) return <p className="text-center mt-10 text-lg text-gray-500">در حال بارگذاری...</p>;
     if (!note) return <p className="text-center mt-10 text-lg text-red-500">یادداشتی وجود ندارد</p>;

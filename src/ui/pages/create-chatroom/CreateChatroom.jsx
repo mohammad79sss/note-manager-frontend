@@ -3,6 +3,9 @@ import { RadioGroup } from '@headlessui/react';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import axios from "axios";
 import toast from 'react-hot-toast';
+import {useDispatch} from "react-redux";
+import {useNavigate} from "react-router-dom";
+import {logoutUser} from "../../shared/utils/functions.js";
 const CreateChatroom = () => {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
 
@@ -18,6 +21,9 @@ const CreateChatroom = () => {
     const [userSearch, setUserSearch] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [allowedUsers, setAllowedUsers] = useState([]);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -61,13 +67,17 @@ const CreateChatroom = () => {
         setAllowedUsers(prev => prev.filter(u => u._id !== userId));
     };
 
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         const payload = {
-            ownerId: '685d96031fa25ccf67b09ed4',
+            ownerId: '685d96031fa25ccf67b09ed4', // Consider replacing this with dynamic user ID if possible
             title: formData.title,
             content: formData.content,
             isShared: formData.isShared,
@@ -75,7 +85,12 @@ const CreateChatroom = () => {
         };
 
         try {
-            const res = await axios.post(`${baseApiUrl}/chatroom`, payload);
+            const res = await axios.post(`${baseApiUrl}/chatroom`, payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
             const result = res.data;
 
             if (result) {
@@ -86,20 +101,23 @@ const CreateChatroom = () => {
                     title: '',
                     content: '',
                     isShared: true,
-                })
+                });
                 setResponse(result);
             }
         } catch (error) {
-            console.error('Error submitting form:', error);
-            toast.error('خطا در ارسال فرم', {
-                duration: 6000,
-            });
-        }
-
-         finally {
+            if (error.response?.status === 401) {
+                handleLogout();
+            } else {
+                console.error('Error submitting form:', error);
+                toast.error('خطا در ارسال فرم', {
+                    duration: 6000,
+                });
+            }
+        } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg text-right">

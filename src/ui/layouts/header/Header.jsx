@@ -6,6 +6,7 @@ import {setLoginFalse} from "../../../store/redux/slices/loginSlice.js";
 import {
     UserCircleIcon,
 } from "@heroicons/react/24/solid";
+import {logoutUser} from "../../shared/utils/functions.js";
 
 export default function Header() {
     const navigate = useNavigate();
@@ -16,9 +17,7 @@ export default function Header() {
     const dispatch = useDispatch();
 
     const handleLogout = () => {
-        localStorage.clear();
-        dispatch(setLoginFalse());
-        navigate("/login");
+        logoutUser(dispatch, navigate);
     };
 
     const handleEditProfile = () => {

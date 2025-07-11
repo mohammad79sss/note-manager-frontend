@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
+import {useDispatch} from "react-redux";
+import {logoutUser} from "../../shared/utils/functions.js";
 
 function EditUser() {
     const userId = localStorage.getItem('userId')
-    const navigate = useNavigate();
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
 
     const [form, setForm] = useState({
@@ -14,31 +15,47 @@ function EditUser() {
         password: "",
     });
 
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await axios.get(`${baseApiUrl}/users/${userId}`);
+                const token = localStorage.getItem("token");
+
+                const res = await axios.get(`${baseApiUrl}/users/${userId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
                 const { username, email } = res.data;
                 console.log(res.data);
                 setForm({ username, email, password: "" });
                 setLoading(false);
             } catch (error) {
-                console.error("Error fetching user:", error);
-                toast.error("خطا در دریافت اطلاعات کاربر");
+                if (error.response?.status === 401) {
+                    handleLogout();
+                } else {
+                    console.error("Error fetching user:", error);
+                    toast.error("خطا در دریافت اطلاعات کاربر");
+                }
                 setLoading(false);
             }
         };
         fetchUser();
     }, [userId, baseApiUrl]);
 
-    const handleChange = (e) => {
-        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    };
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const token = localStorage.getItem("token");
 
         const payload = {
             username: form.username,
@@ -50,14 +67,33 @@ function EditUser() {
         }
 
         try {
-            await axios.put(`${baseApiUrl}/users/${userId}`, payload);
+            await axios.put(`${baseApiUrl}/users/${userId}`, payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
             toast.success("کاربر با موفقیت ویرایش شد");
-            localStorage.setItem('username',form.username);
+            localStorage.setItem('username', form.username);
             navigate("/"); // Or wherever you want to redirect
         } catch (error) {
-            console.error("Error updating user:", error);
-            toast.error("خطا در ویرایش کاربر");
+            if (error.response?.status === 401) {
+                handleLogout();
+            } else {
+                console.error("Error updating user:", error);
+                toast.error("خطا در ویرایش کاربر");
+            }
         }
+    };
+
+
+
+    const handleChange = (e) => {
+        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    };
+
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
     };
 
     if (loading) return <div className="p-6">در حال بارگذاری...</div>;

@@ -3,6 +3,9 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import TextAlign from '@tiptap/extension-text-align'
 import { Bold, Italic, AlignRight, AlignCenter, AlignLeft } from 'lucide-react'
+import {useDispatch} from "react-redux";
+import {useNavigate} from "react-router-dom";
+import {logoutUser} from "../../shared/utils/functions.js";
 
 function CreateNote() {
     const [editorStateUpdated, setEditorStateUpdated] = useState(false);
@@ -10,6 +13,9 @@ function CreateNote() {
     const [isShared, setIsShared] = useState(false); // false = خصوصی, true = عمومی
     const userId = localStorage.getItem("userId");
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
 
     const editor = useEditor({
         extensions: [
@@ -36,6 +42,10 @@ function CreateNote() {
         };
     }, [editor]);
 
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
+    };
+
     const handleSubmit = async () => {
         const content = editor?.getHTML();
 
@@ -46,12 +56,22 @@ function CreateNote() {
             isShared
         };
 
+        const token = localStorage.getItem("token");
+
         try {
             const response = await fetch(`${baseApiUrl}/notes`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
                 body: JSON.stringify(body)
             });
+
+            if (response.status === 401) {
+                handleLogout();
+                return;
+            }
 
             if (response.ok) {
                 alert('یادداشت با موفقیت ثبت شد!');
@@ -63,8 +83,10 @@ function CreateNote() {
             }
         } catch (error) {
             alert('مشکلی در ارتباط با سرور پیش آمد.');
+            console.error("Error submitting note:", error);
         }
     };
+
 
     const IconButton = ({ onClick, Icon, label, active }) => (
         <button

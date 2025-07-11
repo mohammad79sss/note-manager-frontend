@@ -6,15 +6,19 @@ import TextAlign from '@tiptap/extension-text-align';
 import { Bold, Italic, AlignRight, AlignCenter, AlignLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import {useDispatch} from "react-redux";
+import {logoutUser} from "../../shared/utils/functions.js";
 
 function EditNote() {
     const { noteId } = useParams();
-    const navigate = useNavigate();
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
 
     const [title, setTitle] = useState('');
     const [isShared, setIsShared] = useState(false);
     const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
 
     const editor = useEditor({
         extensions: [
@@ -27,18 +31,32 @@ function EditNote() {
         content: '<p dir="rtl" style="text-align: right;">در حال بارگذاری...</p>',
     });
 
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
+    };
+
     useEffect(() => {
         const fetchNote = async () => {
             try {
-                const res = await axios.get(`${baseApiUrl}/notes/${noteId}`);
+
+                const res = await axios.get(`${baseApiUrl}/notes/${noteId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
                 const { title, content, isShared } = res.data;
                 setTitle(title);
                 setIsShared(isShared);
                 editor?.commands.setContent(content || '');
                 setLoading(false);
             } catch (error) {
-                console.error("Error fetching note:", error);
-                toast.error("خطا در دریافت اطلاعات یادداشت");
+                if (error.response?.status === 401) {
+                    handleLogout();
+                } else {
+                    console.error("Error fetching note:", error);
+                    toast.error("خطا در دریافت اطلاعات یادداشت");
+                }
                 setLoading(false);
             }
         };
@@ -47,6 +65,9 @@ function EditNote() {
             fetchNote();
         }
     }, [noteId, baseApiUrl, editor]);
+
+
+
 
     const handleSubmit = async () => {
         const content = editor?.getHTML();
@@ -57,15 +78,26 @@ function EditNote() {
             isShared
         };
 
+
         try {
-            await axios.put(`${baseApiUrl}/notes/${noteId}`, payload);
+            await axios.put(`${baseApiUrl}/notes/${noteId}`, payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
             toast.success("یادداشت با موفقیت ویرایش شد");
             navigate("/");
         } catch (error) {
-            console.error("Error updating note:", error);
-            toast.error("خطا در ویرایش یادداشت");
+            if (error.response?.status === 401) {
+                handleLogout();
+            } else {
+                console.error("Error updating note:", error);
+                toast.error("خطا در ویرایش یادداشت");
+            }
         }
     };
+
 
     const IconButton = ({ onClick, Icon, label, active }) => (
         <button

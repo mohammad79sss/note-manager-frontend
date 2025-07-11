@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import {useDispatch} from "react-redux";
+import {logoutUser} from "../../shared/utils/functions.js";
 
 const EditChatroom = () => {
     const { chatroomId } = useParams();
-    const navigate = useNavigate();
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
 
     const [formData, setFormData] = useState({
@@ -19,24 +20,38 @@ const EditChatroom = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
 
     useEffect(() => {
         const fetchChatroom = async () => {
             try {
-                const res = await axios.get(`${baseApiUrl}/chatroom/${chatroomId}`);
+                const token = localStorage.getItem("token");
+
+                const res = await axios.get(`${baseApiUrl}/chatroom/${chatroomId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
                 const { title, content, isShared, allowedUsers } = res.data;
                 setFormData({ title, content, isShared });
                 setAllowedUsers(allowedUsers || []);
                 setLoading(false);
             } catch (err) {
-                toast.error('خطا در دریافت اطلاعات چت‌روم');
-                console.error(err);
+                if (err.response?.status === 401) {
+                    handleLogout();
+                } else {
+                    toast.error('خطا در دریافت اطلاعات چت‌روم');
+                    console.error(err);
+                }
                 setLoading(false);
             }
         };
 
         fetchChatroom();
     }, [chatroomId, baseApiUrl]);
+
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -45,6 +60,11 @@ const EditChatroom = () => {
             [name]: value,
         }));
     };
+
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
+    };
+
 
     const handleIsSharedChange = (value) => {
         setFormData(prev => ({
@@ -62,12 +82,22 @@ const EditChatroom = () => {
         }
 
         try {
-            const res = await axios.get(`${baseApiUrl}/users?search=${query}`);
+            const token = localStorage.getItem("token");
+
+            const res = await axios.get(`${baseApiUrl}/users?search=${query}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             setSearchResults(res.data);
         } catch (error) {
-            console.error('User search error:', error);
+            if (error.response?.status === 401) {
+                handleLogout();
+            } else {
+                console.error('User search error:', error);
+            }
         }
     };
+
 
     const handleAddUser = (user) => {
         if (!allowedUsers.find(u => u._id === user._id)) {
@@ -83,6 +113,8 @@ const EditChatroom = () => {
         e.preventDefault();
         setSaving(true);
 
+        const token = localStorage.getItem("token");
+
         const payload = {
             title: formData.title,
             content: formData.content,
@@ -91,16 +123,24 @@ const EditChatroom = () => {
         };
 
         try {
-            const res = await axios.put(`${baseApiUrl}/chatroom/${chatroomId}`, payload);
+            const res = await axios.put(`${baseApiUrl}/chatroom/${chatroomId}`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             toast.success('چت‌روم با موفقیت ویرایش شد');
-            navigate('/'); // or wherever you want
+            navigate('/');
         } catch (error) {
-            toast.error('خطا در ویرایش چت‌روم');
-            console.error(error);
+            if (error.response?.status === 401) {
+                handleLogout();
+            } else {
+                toast.error('خطا در ویرایش چت‌روم');
+                console.error(error);
+            }
         } finally {
             setSaving(false);
         }
     };
+
 
     if (loading) {
         return <div className="text-center mt-10">در حال بارگذاری...</div>;

@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import {useDispatch} from "react-redux";
+import {useNavigate} from "react-router-dom";
+import {logoutUser} from "../../shared/utils/functions.js";
 
 function UserSettings() {
     const baseApiUrl = import.meta.env.VITE_BASE_API_URL;
     const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading]= useState(true);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const token = localStorage.getItem("token");
+    const handleLogout = () => {
+        logoutUser(dispatch, navigate);
+    };
 
     useEffect(() => {
         fetchUsers();
@@ -13,12 +22,21 @@ function UserSettings() {
 
     const fetchUsers = async () => {
         try {
-            const res = await axios.get(`${baseApiUrl}/users`);
+            const token = localStorage.getItem("token");
+
+            const res = await axios.get(`${baseApiUrl}/users`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             setUsers(res.data);
             setIsLoading(false);
         } catch (error) {
-            console.error("Error fetching users:", error);
-            toast.error("خطا در دریافت لیست کاربران");
+            if (error.response?.status === 401) {
+                handleLogout();
+            } else {
+                console.error("Error fetching users:", error);
+                toast.error("خطا در دریافت لیست کاربران");
+            }
             setIsLoading(false);
         }
     };
@@ -28,14 +46,24 @@ function UserSettings() {
         if (!confirmDelete) return;
 
         try {
-            await axios.delete(`${baseApiUrl}/users/${userId}`);
+            const token = localStorage.getItem("token");
+
+            await axios.delete(`${baseApiUrl}/users/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
             toast.success("کاربر با موفقیت حذف شد");
         } catch (error) {
-            console.error("Error deleting user:", error);
-            toast.error("خطا در حذف کاربر");
+            if (error.response?.status === 401) {
+                handleLogout();
+            } else {
+                console.error("Error deleting user:", error);
+                toast.error("خطا در حذف کاربر");
+            }
         }
     };
+
 
     return (
         <div className="p-6">
